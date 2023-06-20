@@ -1,3 +1,13 @@
+
+""" 
+Defines :
+1) functions that can normalize and clip
+2) functions to apply nms or score thresholding
+3) Classes defining transforms:
+__call__ function is overloading with funcitonality
+so they can be called by another object
+"""
+
 import logging
 from functools import partial
 from typing import Callable, List

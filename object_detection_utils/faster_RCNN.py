@@ -1,3 +1,76 @@
+""" 
+Purpose: 
+1) Can create a FastRCNN model using:
+a. anchor_generator (obj from torchvision.models.detection.rpn)
+b. MultiScaleRoIAlign (from pytorch)
+c. backbone resent model
+d. metadata like: (sets these metadata as attributes of model)
+- num_classes
+-image_mean/std
+-min/max size
+
+
+min_size (int): minimum size of the image to be rescaled before feeding it to the backbone
+max_size (int): maximum size of the image to be rescaled before feeding it to the backbone
+image_mean (Tuple[float, float, float]): mean values used for input normalization.
+    They are generally the mean values of the dataset on which the backbone has been trained
+    on
+image_std (Tuple[float, float, float]): std values used for input normalization.
+    They are generally the std values of the dataset on which the backbone has been trained on
+    
+    
+
+FasterRCNNLightning only required defining:
+0) init where defines:
+- model
+- number of classes
+- learning rate
+- iou trehsold
+- transformation parameters: mean/std/min_size/max_size
+- save_hyperparameters (saved within the model checkpoint,)
+- creates lists to store the outputs of train/test/val
+
+
+1) frowrd_step (in eval mode)
+- only need x
+2) training_step:
+- forward step with x,y
+- sums the loss and returns it
+
+Returns: model output
+
+Returns: loss
+3) validation_step:
+- forward step (with just x)
+- generates the ground truth bounding boxes (from y)
+- generattes the predicted boundingbox objects (from predictions)
+- appends boxes to validation list
+
+---> but not done with entire epoch so just appends
+list because only for one batch
+
+Returns: output
+
+4) on_validation_epoch_end:
+- processes the ground truth and predicted boxes
+for the validation metrics and print them out for each class
+
+
+
+5) test_step:
+- runs forward pass through batch, gets prediction/ground truth bounding box objects and append to list
+
+---> but not done with entire epoch so just appends
+list because only for one batch
+
+6) on_test_epoch_end
+(same as on-validation_epoch_end)
+
+7) configure_optimizers:
+sets the optimizer
+"""
+
+
 import logging
 from collections import OrderedDict
 from itertools import chain
@@ -9,17 +82,17 @@ from torchvision.models.detection.faster_rcnn import FasterRCNN
 from torchvision.models.detection.rpn import AnchorGenerator
 from torchvision.ops import MultiScaleRoIAlign
 
-from pytorch_faster_rcnn_tutorial.backbone_resnet import (
+from .backbone_resnet import (
     BackboneWithFPN,
     ResNetBackbones,
     get_resnet_backbone,
     get_resnet_fpn_backbone,
 )
-from pytorch_faster_rcnn_tutorial.metrics.enumerators import MethodAveragePrecision
-from pytorch_faster_rcnn_tutorial.metrics.pascal_voc_evaluator import (
+from .metrics.enumerators import MethodAveragePrecision
+from .metrics.pascal_voc_evaluator import (
     get_pascalvoc_metrics,
 )
-from pytorch_faster_rcnn_tutorial.utils import from_dict_to_boundingbox
+from .utils import from_dict_to_boundingbox
 
 logger: logging.Logger = logging.getLogger(__name__)
 
@@ -152,6 +225,17 @@ def get_faster_rcnn_resnet(
 
 
 class FasterRCNNLightning(pl.LightningModule):
+    """Creates the object that will make running easier
+    where only have to define
+    
+    1) hyperparameters in init
+    2) what to do during:
+    - forward
+    - training_step/validation_step/test_step
+    - on_[validation/test]_epoch_end
+    3) optimizers
+    
+    """
     def __init__(
         self, model: torch.nn.Module, lr: float = 0.0001, iou_threshold: float = 0.5
     ):

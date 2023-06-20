@@ -1,3 +1,19 @@
+""" 
+Purpose: utility functions that cover the following: 
+
+1) reading in jsons,images
+2) collating (separating list of dicts into arrays for keys)
+3) caluclating stats for a dataset
+4) converting file or diction to list of boundingbox objs
+5) neptune logging utilities
+- curent package config
+- mapping of classes to labels
+- log checkpoints of model (parameters and )
+- log model itself
+
+"""
+
+
 import json
 import logging
 import os
@@ -11,9 +27,10 @@ import torch
 from torch.utils.data import Dataset
 from torchvision.models.detection.transform import GeneralizedRCNNTransform
 from torchvision.ops import box_area, box_convert
+from skimage.io import imread
 
-from pytorch_faster_rcnn_tutorial.metrics.bounding_box import BoundingBox
-from pytorch_faster_rcnn_tutorial.metrics.enumerators import BBFormat, BBType
+from .metrics.bounding_box import BoundingBox
+from .metrics.enumerators import BBFormat, BBType
 
 logger: logging.Logger = logging.getLogger(__name__)
 
@@ -27,6 +44,23 @@ def get_filenames_of_path(path: pathlib.Path, ext: str = "*") -> List[pathlib.Pa
     logger.info(f"Found {len(filenames)} files in {path}")
     return filenames
 
+def read_image_target(
+    image_filepath, 
+    target_filepath,
+    default_labels = None):
+            
+        x,y = imread(image_filepath), read_json(target_filepath)
+        
+        if "labels" not in y:
+            if default_labels is None:
+                box_name = [k for k in y.keys() if "box" in k][0]
+                default_labels = ['no_label']*len(y[box_name])
+            y['labels'] = default_labels
+            
+        y = dict([(k,v) if "boxes" not in k 
+                else ('boxes',v) for k,v in y.items()])
+        
+        return x,y
 
 def read_json(path: pathlib.Path) -> dict:
     with open(str(path), "r") as fp:  # fp is the file pointer

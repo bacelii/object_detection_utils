@@ -1,12 +1,20 @@
+"""
+Purpose: Defines the bounding Box class that has 
+1) BoundingBox object
+2) Static methods of BoundingBox where can calculate stats about boxes
+3) Calculate states or get labels from lists of bounding boxes
+
+"""
+
 import logging
 from typing import Optional
 
-from pytorch_faster_rcnn_tutorial.metrics.enumerators import (
+from .enumerators import (
     BBFormat,
     BBType,
     CoordinatesType,
 )
-from pytorch_faster_rcnn_tutorial.metrics.general_utils import (
+from .general_utils import (
     convert_to_absolute_values,
     convert_to_relative_values,
 )
@@ -15,7 +23,24 @@ logger: logging.Logger = logging.getLogger(__name__)
 
 
 class BoundingBox:
-    """Class representing a bounding box."""
+    """Class representing a bounding box.
+    
+    Purpose: 
+    1) store coordinates, coordinate type, image size and other attributes
+    2) does conversion from relative coordinates to absolute coordinate
+    - accounts for a lot of different coordinate types (xyx2y2 or xywh, etc.)
+    3) Calculates Area
+    4) static method (not have access to class or instance) for calculating bbox stuff:
+    a. have_intersection
+    b. get intersection area
+    c. get union area
+    d. calculated the iou (intersection over union) : aka the relative overlap
+    e. manipulation of a list of bouding boxes:
+    - get all bounding boxes of certain classes
+    - build a dictionary counting the number of each class in list of bounding box
+    - get all image names from list
+    - calculate average area of all bounding boxes
+    """
 
     def __init__(
         self,

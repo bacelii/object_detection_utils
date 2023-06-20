@@ -1,3 +1,24 @@
+"""
+Purpose: Calculate the evaluation metrics from the bounding
+boxes using the mean Average Precision metrics for each class
+
+Main function: get_pascalvoc_metrics
+
+Args: 
+- LIST[grount truth boxes objs]
+- LIST[detected boxes]
+- iou_threshodl of what boes to consider
+- whether you want to save of precision, recall, accuracy numbers
+so that a table can be generated later
+
+Returns: 
+- dictionary of results per classs
+- mean average precision across all classes
+
+"""
+
+
+
 import logging
 import os
 import sys
@@ -7,8 +28,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from pytorch_faster_rcnn_tutorial.metrics.bounding_box import BoundingBox
-from pytorch_faster_rcnn_tutorial.metrics.enumerators import MethodAveragePrecision
+from .bounding_box import BoundingBox
+from .enumerators import MethodAveragePrecision
 
 logger: logging.Logger = logging.getLogger(__name__)
 

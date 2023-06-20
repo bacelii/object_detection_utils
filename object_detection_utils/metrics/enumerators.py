@@ -1,3 +1,15 @@
+"""
+Purpose: Define different options for bounding box specifics
+1) coordinate type (relative or aboslute)
+2) bounding box type (ground truth or detected)
+3) format of bounding box coordinates
+
+and image specifics:
+1) file format
+
+evaluate metric type:
+"""
+
 import logging
 from enum import Enum
 

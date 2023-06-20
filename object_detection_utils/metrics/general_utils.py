@@ -1,3 +1,12 @@
+"""
+Purpose: utility functions for converting coordinates 
+(of different coordinate type) to absolute or relative coordinates based on
+1) current coordinate values
+2) coordinate type
+3) image height/width
+"""
+
+
 import logging
 
 logger: logging.Logger = logging.getLogger(__name__)

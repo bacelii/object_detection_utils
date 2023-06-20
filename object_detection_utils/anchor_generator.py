@@ -1,3 +1,7 @@
+"""
+Purpose: generates the anchor boxes based on sizes
+"""
+
 import logging
 from typing import Tuple
 

@@ -1,3 +1,14 @@
+
+""" 
+Purpose: Will get the following for the model:
+1) the pretrained resnet (deepends on how many trainable layers wanted, size)
+- ex: resnet18
+2) adds a feature pyramid network
+3) freezes the layers that specify
+
+returns regular nn.Module to be used later
+"""
+
 import logging
 from enum import Enum
 from typing import Dict, List, Optional

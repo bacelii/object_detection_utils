@@ -9,15 +9,16 @@ from skimage.io import imread
 from torch.utils.data import Dataset
 from torchvision.ops import box_convert
 
-from pytorch_faster_rcnn_tutorial.transformations import (
+from .transformations import (
     ComposeDouble,
     ComposeSingle,
     map_class_to_int,
 )
-from pytorch_faster_rcnn_tutorial.utils import read_json
+from .utils import read_json,read_image_target
 
 logger: logging.Logger = logging.getLogger(__name__)
 
+default_labels_foot = ['T1', 'T2', 'T3', 'T4', 'T5', 'MT1', 'MT5', 'CBL', 'CBR', 'CTL', 'CTR']
 
 class ObjectDetectionDataSet(Dataset):
     """
@@ -29,6 +30,7 @@ class ObjectDetectionDataSet(Dataset):
     In case your labels are strings, you can specify 'mapping' (a dict) to int-encode them.
     Returns a dict with the following keys: 'x', 'x_name', 'y', 'y_name'
     """
+    
 
     def __init__(
         self,
@@ -38,6 +40,7 @@ class ObjectDetectionDataSet(Dataset):
         use_cache: bool = False,
         convert_to_format: str = None,
         mapping: Dict = None,
+        default_labels: List[str] = None,
     ):
         self.inputs = inputs
         self.targets = targets
@@ -45,6 +48,10 @@ class ObjectDetectionDataSet(Dataset):
         self.use_cache = use_cache
         self.convert_to_format = convert_to_format
         self.mapping = mapping
+        
+        if default_labels is None:
+            default_labels = default_labels_foot
+        self.default_labels = default_labels
 
         if self.use_cache:
             # Use multiprocessing to load images and targets into RAM
@@ -132,9 +139,16 @@ class ObjectDetectionDataSet(Dataset):
             "y_name": self.targets[index].name,
         }
 
-    @staticmethod
-    def read_images(inp, tar):
-        return imread(inp), read_json(tar)
+
+    def read_images(self,inp, tar,default_labels = None):
+        if default_labels is None:
+            default_labels = self.default_labels
+        return read_image_target(
+            inp,
+            tar,
+            default_labels=default_labels,
+        )
+
 
 
 class ObjectDetectionDatasetSingle(Dataset):
